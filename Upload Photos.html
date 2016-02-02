@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css">		
+  		<script type="text/javascript" src="js/jquery-1.11.1.js" ></script>
+  		<script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			window.onload=function(){
+				var dropBox=document.getElementById("dropBox");
+				var imgInfo=document.getElementById("imgInfo");
+				dropBox.addEventListener("dragover",function(e){
+					e.stopPropagation();
+					e.preventDefault();
+				},false);
+				dropBox.addEventListener("drop", function(e){
+					alert("success");
+					handleDrop(e);
+				},false);
+			}
+			function handleDrop(e){
+				var evt=e?e:window.event;
+				window.event? window.event.cancelBubble = true : evt.stopPropagation();
+				window.event? window.event.returnValue = false : evt.preventDefault();
+				//获取拖拽文件列表
+				var fileList=e.dataTransfer.files;
+				var fileType=fileList[0].type;
+				var img=document.createElement("img");
+				//清除释放
+				img.onload=function(e){
+					window.URL.revokeObjectURL(img.src);
+				};
+				//检测是否是拖拽文件到页面的操作
+				if(fileList.length==0) return;
+				//检测文件是不是图片
+				if(fileType.indexOf('image')==-1){
+					alert("请拖拽图片");
+					return;
+				}
+				
+				/*if(window.URL.createObjectURL){
+					//FF4+
+					img.src=window.URL.createObjectURL(fileList[0]);
+				}else if(window.webkitURL.createObjectURL){
+					//chrome8+
+					img.src=window.webkitURL.createObjectURL(fileList[0]);
+				}else{*/
+					//实例化file reader对象
+					var reader=new FileReader();
+					reader.onload=function(e){
+						img.src=this.result;
+						dropBox.innerHTML='';
+						dropBox.appendChild(img);
+						imgInfo.innerHTML=this.result;
+					};
+					reader.readAsDataURL(fileList[0]);
+				//}
+			}
+			function fileRequest(){
+				var xhr=new XMLHTttpRequest();
+				var url="upload.photos.com";
+				var boundary="----------------"+ new Date().getTime();
+				xhr.open("post",url,true);
+				xhr.setRequestHeader("content-Type","form-data; boundary="+boundary);
+				
+				if(window.FormData){
+					//chrome12+
+					var formData=new FormData();
+					formData.append("file",file);
+					formData.append("useId",useId);
+					
+				}
+				xhr.send(formData);
+				xhr.onreadystatechange=function(){
+					if(xhr.readyState==4 && xhr.status==200){
+						alert("request success"+xhr.responseText);
+					}else{
+						alert(xhr.statusText);
+					}
+				};
+			}
+			function onShowPlane(){
+				if(parseInt($(".listPlane").css("left"))<0){
+					$(".listPlane").addClass("showPlane");
+				}else{
+					$(".listPlane").removeClass("showPlane");
+				}
+			}
+		</script>
+		<style>
+			.toolbars{
+				padding-left: 24px;
+    			padding-top: 10px;
+			}
+			.toolbars i,.list-group i{
+				font-size: 30px;
+			}
+			.pageHeader i:hover{
+				cursor: pointer;
+			}
+			.pageHeader .iAddPhotos,.pageHeader .iUpload,.pageHeader .iDetail,.pageHeader .iBell,.pageHeader .iUser{
+				position: absolute;
+				font-size: 30px;
+    			top: 13px;
+			}
+			.pageHeader .iAddPhotos{
+			    left: 830px;	
+			}
+			.pageHeader .iUpload{
+				left: 870px;	
+			}
+			.pageHeader .iDetail{
+			    right: 180px;	
+			}
+			.pageHeader .iBell{
+				right: 130px;
+			}
+			.pageHeader .iUser{
+				right: 80px;
+			}
+			.searchTool{
+				width:500px;
+				margin-left: 300px;
+    			margin-top: -30px;
+			}
+			.listPlane{
+				position: absolute;
+				left: -154px;
+				transition: left 0.5s;
+				-moz-transition:left 0.5s;
+				-webkit-transition:left 0.5s; 
+				-o-transition:left 0.5s;
+			}
+			.listPlane.showPlane{
+				left: 0px;
+				transition: left 1s;
+				-moz-transition:left 1s;
+				-webkit-transition:left 1s; 
+				-o-transition:left 1s;
+			}
+			#dropBox{
+				width:1900px;
+				height: 880px;
+				border: 1px solid;
+				overflow:hidden;
+			}
+			.pageContent{
+				padding: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="pageHeader">
+			<div class="toolbars"  onclick="onShowPlane();"><i class="fa fa-bars"></i></div>
+			<div class="searchTool input-group margin-bottom-sm">
+				<span class="seachIcon input-group-addon"><i class="fa fa-search"></i></span>
+				<input class="form-control" type="text" placeholder="Search">
+			</div>
+			<i class="iAddPhotos fa fa-plus"></i>
+			<i class="iUpload fa fa-cloud-upload"></i>
+			<i class="iDetail fa fa-th"></i>
+			<i class="iBell fa fa-bell-o"></i>
+			<i class="iUser fa fa-user"></i>
+			<div class="listPlane">
+				<div class="list-group">
+  					<a class="list-group-item" href="#"><i class="fa fa-home fa-fw"></i>&nbsp; Home</a>
+  					<a class="list-group-item" href="#"><i class="fa fa-book fa-fw"></i>&nbsp; Library</a>
+  					<a class="list-group-item" href="#"><i class="fa fa-pencil fa-fw"></i>&nbsp; Applications</a>
+  					<a class="list-group-item" href="#"><i class="fa fa-cog fa-fw"></i>&nbsp; Settings</a>
+				</div>
+			</div>
+		</div>
+		<div class="pageContent">
+			<div id="dropBox">拖拽图片到这里！</div>
+			<div id="imgInfo"></div>
+		</div>
+		<div class="pageFooter"></div>
+	</body>
+</html>
